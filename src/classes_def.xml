@@ -13,6 +13,8 @@
 	<class name="FastVerticalInterpHistPdfBase" />
 	<class name="FastVerticalInterpHistPdfBase::Morph" />
 	<class name="HZZ4L_RooSpinZeroPdf" />
+	<class name="HZZ4L_RooHighmass_1D" />
+	<class name="HZZ4L_RooHighmass" />
 	<class name="HZZ4L_RooSpinZeroPdf_2D" />
 	<class name="HZZ4L_RooSpinZeroPdf_phase" />
 	<class name="ProcessNormalization" />

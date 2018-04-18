@@ -26,6 +26,8 @@
 #include "HiggsAnalysis/CombinedLimit/interface/AtlasPdfs.h"
 #include "HiggsAnalysis/CombinedLimit/interface/HZZ4L_RooSpinZeroPdf.h"
 #include "HiggsAnalysis/CombinedLimit/interface/HZZ4L_RooSpinZeroPdf_phase.h"
+#include "HiggsAnalysis/CombinedLimit/interface/HZZ4L_RooHighmass_1D.h"
+#include "HiggsAnalysis/CombinedLimit/interface/HZZ4L_RooHighmass.h"
 #include "HiggsAnalysis/CombinedLimit/interface/HZZ4L_RooSpinZeroPdf_2D.h"
 #include "HiggsAnalysis/CombinedLimit/interface/HWWLVJJRooPdfs.h"
 #include "HiggsAnalysis/CombinedLimit/interface/RooMomentMorphND.h"
