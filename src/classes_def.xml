@@ -79,6 +79,8 @@
 	<class name="VBFHZZ4L_RooSpinZeroPdf" />
 	<class name="VBFHZZ4L_RooSpinZeroPdf_fast" />
 
+	<class name="HZZ4L_RooHighmass" />
+	<class name="HZZ4L_RooHighmass_1D" />
 	<class name="HZZ4L_RooSpinZeroPdf_1D_fast" />
 	<class name="HZZ4L_RooSpinZeroPdf_2D_fast" />
 	<class name="HZZ4L_RooSpinZeroPdf_phase_fast" />
