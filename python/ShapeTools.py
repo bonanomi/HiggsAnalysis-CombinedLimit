@@ -385,6 +385,7 @@ class ShapeBuilder(ModelBuilder):
             self.out.mode = "binned"
             if self.options.verbose > 1: stderr.write("Will make a binned dataset\n")
             if self.options.verbose > 1: stderr.write("Observables: %s\n" % str(shapeObs.keys()))
+	    print shapeObs.keys()
             if len(shapeObs.keys()) != 1:
                 raise RuntimeError, "There's more than once choice of observables: %s\n" % str(shapeObs.keys())
             self.out.binVars = shapeObs.values()[0]
@@ -661,7 +662,9 @@ class ShapeBuilder(ModelBuilder):
             xvar = nominalPdf.dataHist().get().first()
             _cache[(channel,process)] = ROOT.FastVerticalInterpHistPdf("shape%s_%s_%s_morph" % (postFix,channel,process), "", xvar, pdfs, coeffs, qrange, qalgo)
         else:
-            _cache[(channel,process)] = ROOT.VerticalInterpPdf("shape%s_%s_%s_morph" % (postFix,channel,process), "", pdfs, coeffs, qrange, qalgo)
+	    xvar =  nominalPdf.getObservables(self.out.data_obs) #.first()
+	    print xvar
+            _cache[(channel,process)] = ROOT.VerticalInterpPdf("shape%s_%s_%s_morph" % (postFix,channel,process), "", xvar,pdfs, coeffs, qrange, qalgo)
         return _cache[(channel,process)]
     def isShapeSystematic(self,channel,process,syst):
     	systShapeName = syst
