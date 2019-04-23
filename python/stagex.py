@@ -36,6 +36,8 @@ class stagex(PhysicsModel):
 			  	muname= "r_VH"
 			elif process.startswith("TTH"):
 			  	muname= "r_TTH"
+			elif process.startswith("TH"):
+			  	muname= "r_TTH"
 			elif process.startswith("BBH"):
 			  	muname= "r_ggH"
 			elif process.startswith("VH"):
@@ -52,12 +54,14 @@ class stagex(PhysicsModel):
 		elif self.rvrf:
 		  	if ("VH" in process or "VBF" in process):
 				muname= "rv"
-		  	elif ("ggH" in process or "BBH" in process or "TTH" in process):
+		  	elif ("ggH" in process or "BBH" in process or "TH" in process):
 				muname= "rf"
 		else:
 			muname = "r_%s"%process
 			if process.startswith("BBH"):
 			  	muname= "r_ggH_0j_10_200"
+			if process.startswith("TH"):
+			  	muname= "r_TTH"
 			muname = muname.replace("_VHori","") 
 			muname = muname.replace("_VBFori","") 
 		if self.modelBuilder.out.var(muname):
