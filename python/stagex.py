@@ -5,6 +5,9 @@ class stagex(PhysicsModel):
     "Allow different signal strength fits for the stage-x model"
     def __init__(self):
 	self.POIs = ""
+	self.actth=False 
+	self.acggh=False 
+	self.accor=False 
 	self.options= ""
 	self.stage0= False 
 	self.rvrf= False 
@@ -23,7 +26,13 @@ class stagex(PhysicsModel):
 		muname=""
 		if self.stage0 :
 			if process.startswith("ggH"):
-				muname= "r_ggH"
+				if self.acggh:
+				    if "ALT" in process:
+				  	muname= "r_ggH_times_x"
+				    else:
+				  	muname= "r_ggH_times_notx"
+				else:
+				 muname= "r_ggH"
 		  	elif "VHori" in process :
 				muname= "r_VH"
 		  	elif "VBFori" in process :
@@ -35,8 +44,14 @@ class stagex(PhysicsModel):
 			elif process.startswith("ZH"):
 			  	muname= "r_VH"
 			elif process.startswith("TTH"):
-			  	muname= "r_TTH"
-			elif process.startswith("TH"):
+				if self.actth:
+				    if "ALT" in process:
+				  	muname= "r_TTH_times_x"
+				    else:
+				  	muname= "r_TTH_times_notx"
+				else:
+					muname = "r_TTH"
+			elif process.startswith("TH") or process.startswith("tqH"):
 			  	muname= "r_TTH"
 			elif process.startswith("BBH"):
 			  	muname= "r_ggH"
@@ -64,21 +79,45 @@ class stagex(PhysicsModel):
 			  	muname= "r_TTH"
 			muname = muname.replace("_VHori","") 
 			muname = muname.replace("_VBFori","") 
+		if self.actth or self.acggh:
+			self.modelBuilder.doVar("r_TTH[1,0,10]" )
+			self.modelBuilder.doVar("r_ggH[1,0,10]" )
+			self.modelBuilder.doVar("x[0,0,1]" )
+			self.modelBuilder.factory_("expr::r_TTH_times_x(\"@0*@1/2.56\", r_TTH, x)");
+			self.modelBuilder.factory_("expr::r_TTH_times_notx(\"@0*(1-@1)\", r_TTH, x)");
+			if self.accor:
+				self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*@1\", r_TTH, x)");
+				self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-@1)\", r_TTH, x)");
+				self.pois.append("x,r_TTH")
+			else:
+				self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*@1\", r_ggH, x)");
+				self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-@1)\", r_ggH, x)");
+				self.pois.append("x,r_ggH,r_TTH")
 		if self.modelBuilder.out.var(muname):
 			print "reclying %s" %muname
 		else:
-			self.modelBuilder.doVar("%s[1,0,10]" % muname)
-			print "scale process %s with %s" %(process,muname)
-			self.pois.append(muname)
-			self.POIs=",".join(self.pois)
-			self.modelBuilder.doSet("POI",self.POIs)
-			print "Default parameters of interest: ", self.POIs
+			if not "times" in muname:
+				self.modelBuilder.doVar("%s[1,0,10]" % muname)
+				print "scale process %s with %s" %(process,muname)
+				self.pois.append(muname)
+				self.POIs=",".join(self.pois)
+				self.modelBuilder.doSet("POI",self.POIs)
+				print "Default parameters of interest: ", self.POIs
 		return muname 
     def setPhysicsOptions(self,physOptions):
 	    for po in physOptions:
 		    if 'doStage0' in po: 
 			    self.stage0= True
 	                    print "doing stage0"
+		    if 'doactth' in po: 
+			    self.actth= True
+	                    print "doing tth AC ttH"
+		    if 'doaccor' in po: 
+			    self.accor= True
+	                    print "doing tth AC ttH"
+		    if 'doacggh' in po: 
+			    self.acggh= True
+	                    print "doing tth AC ggH"
 		    if 'singlemu' in po: 
 			    self.singlemu= True
 	                    print "doing single mu"
