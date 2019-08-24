@@ -124,6 +124,10 @@
 	<class name="RooCPSHighMassVBFNoInterf" />
 	<class name="RooChebyshevPDF" />
 	<class name="RooDoubleCB" />
+	<class name="SplinePdf" />
+	<class name="Width_conv" />
+	<class name="Width_integral" />
+	<class name="RooDoubleCB_spec" />
 	<class name="RooDoubleCrystalBall" />
 	<class name="RooErfExpPdf" />
 	<class name="RooErfPdf" />
