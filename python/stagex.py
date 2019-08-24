@@ -8,6 +8,7 @@ class stagex(PhysicsModel):
 	self.actth=False 
 	self.acggh=False 
 	self.accor=False 
+	self.eft=False 
 	self.options= ""
 	self.stage0= False 
 	self.rvrf= False 
@@ -26,13 +27,22 @@ class stagex(PhysicsModel):
 		muname=""
 		if self.stage0 :
 			if process.startswith("ggH"):
-				if self.acggh:
+				if self.acggh: 
 				    if "ALT" in process:
-				  	muname= "r_ggH_times_x"
+				  	if self.eft:
+				  		muname= "c_ts"
+					else:
+				  		muname= "r_ggH_times_x"
 				    else:
-				  	muname= "r_ggH_times_notx"
+				  	if self.eft:
+				  		muname= "c_s"
+					else:
+				  		muname= "r_ggH_times_notx"
 				else:
-				 muname= "r_ggH"
+				    if not "ALT" in process:
+				 	muname= "r_ggH"
+				    else:
+					    return 0
 		  	elif "VHori" in process :
 				muname= "r_VH"
 		  	elif "VBFori" in process :
@@ -43,16 +53,25 @@ class stagex(PhysicsModel):
 			  	muname= "r_VH"
 			elif process.startswith("ZH"):
 			  	muname= "r_VH"
-			elif process.startswith("TTH"):
+			elif process.startswith("TTH") or process.startswith("TH") or process.startswith("tqH"):
 				if self.actth:
 				    if "ALT" in process:
-				  	muname= "r_TTH_times_x"
+				  	if self.eft:
+				  		muname= "kappa_ts"
+					else:
+				  		muname= "r_TTH_times_x"
 				    else:
-				  	muname= "r_TTH_times_notx"
+				  	if self.eft:
+				  		muname= "kappa_s"
+					else:
+				  		muname= "r_TTH_times_notx"
 				else:
+				    if not "ALT" in process:
 					muname = "r_TTH"
-			elif process.startswith("TH") or process.startswith("tqH"):
-			  	muname= "r_TTH"
+				    else:
+					    return 0
+#			elif process.startswith("TH") or process.startswith("tqH"):
+#			  	muname= "r_TTH"
 			elif process.startswith("BBH"):
 			  	muname= "r_ggH"
 			elif process.startswith("VH"):
@@ -80,23 +99,42 @@ class stagex(PhysicsModel):
 			muname = muname.replace("_VHori","") 
 			muname = muname.replace("_VBFori","") 
 		if self.actth or self.acggh:
-			self.modelBuilder.doVar("r_TTH[1,0,10]" )
-			self.modelBuilder.doVar("r_ggH[1,0,10]" )
-			self.modelBuilder.doVar("x[0,0,1]" )
-			self.modelBuilder.factory_("expr::r_TTH_times_x(\"@0*@1/2.56\", r_TTH, x)");
-			self.modelBuilder.factory_("expr::r_TTH_times_notx(\"@0*(1-@1)\", r_TTH, x)");
-			if self.accor:
-				self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*@1\", r_TTH, x)");
-				self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-@1)\", r_TTH, x)");
-				self.pois.append("x,r_TTH")
+			if self.eft:
+				self.modelBuilder.doVar("kappa[1,0,10]" )
+				self.modelBuilder.doVar("kappa_t[0,-10,10]" )
+				self.modelBuilder.doVar("cgg[1,0,10]" )
+				self.modelBuilder.doVar("cgg_t[0,-10,10]" )
+				self.modelBuilder.factory_("expr::kappa_ts(\"@0*@0/2.56\", kappa_t)");
+				self.modelBuilder.factory_("expr::kappa_s(\"@0*@0\", kappa)");
+				if not self.accor:
+					self.modelBuilder.factory_("expr::c_ts(\"@0*@0\", cgg_t)");
+					self.modelBuilder.factory_("expr::c_s(\"@0*@0\", cgg)");
+				else:
+					self.modelBuilder.factory_("expr::c_ts(\"@0*@0*2.25\", kappa_t)");
+					self.modelBuilder.factory_("expr::c_s(\"@0*@0\", kappa)");
+				if self.actth:
+					self.pois.append("kappa,kappa_t")
+				else:
+					self.pois.append("cgg,cgg_t")
+
 			else:
-				self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*@1\", r_ggH, x)");
-				self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-@1)\", r_ggH, x)");
-				self.pois.append("x,r_ggH,r_TTH")
+				self.modelBuilder.doVar("r_TTH[1,0,10]" )
+				self.modelBuilder.doVar("r_ggH[1,0,10]" )
+				self.modelBuilder.doVar("x[0,0,1]" )
+				self.modelBuilder.factory_("expr::r_TTH_times_x(\"@0*@1/2.56\", r_TTH, x)");
+				self.modelBuilder.factory_("expr::r_TTH_times_notx(\"@0*(1-@1)\", r_TTH, x)");
+				if self.accor:
+					self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*@1\", r_TTH, x)");
+					self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-@1)\", r_TTH, x)");
+					self.pois.append("x,r_TTH")
+				else:
+					self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*@1\", r_ggH, x)");
+					self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-@1)\", r_ggH, x)");
+					self.pois.append("x,r_ggH,r_TTH")
 		if self.modelBuilder.out.var(muname):
 			print "reclying %s" %muname
 		else:
-			if not "times" in muname:
+			if muname.startswith("r_") and not "times" in muname:
 				self.modelBuilder.doVar("%s[1,0,10]" % muname)
 				print "scale process %s with %s" %(process,muname)
 				self.pois.append(muname)
@@ -118,6 +156,9 @@ class stagex(PhysicsModel):
 		    if 'doacggh' in po: 
 			    self.acggh= True
 	                    print "doing tth AC ggH"
+		    if 'doeft' in po: 
+			    self.eft= True
+	                    print "doing EFT framework"
 		    if 'singlemu' in po: 
 			    self.singlemu= True
 	                    print "doing single mu"
