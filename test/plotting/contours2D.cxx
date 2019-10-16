@@ -1,9 +1,9 @@
-
 #include "CMS_lumi.C"
+#include "plotstyle.h"
 TGraph* bestFit(TTree *t, TString x, TString y, TCut cut, double minv) {
-	//    int nfind = t->Draw(y+":"+x, cut + Form("abs(deltaNLL -%f)<0.001",minv));
+	int nfind = t->Draw(y+":"+x, cut + Form("abs(deltaNLL -%f)<0.001",minv));
 	//   cout<<"find "<<nfind<<endl;
-	int nfind = t->Draw(y+":"+x, cut + Form("deltaNLL == %f",0));
+	//int nfind = t->Draw(y+":"+x, cut + Form("deltaNLL == %f",0));
 	if (nfind == 0) {
 		TGraph *gr0 = new TGraph(1);
 		gr0->SetPoint(0,-999,-999);
@@ -19,8 +19,8 @@ TGraph* bestFit(TTree *t, TString x, TString y, TCut cut, double minv) {
 }
 
 TH2 *treeToHist2D(TTree *t, TString x, TString y, TString name, TCut cut, double xmin, double xmax, double ymin, double ymax, int xbins, int ybins, double minv) {
-	//    t->Draw(Form("2*(deltaNLL-%f):%s:%s>>%s_prof(%d,%10g,%10g,%d,%10g,%10g)", minv,y.Data(), x.Data(), name.Data(), xbins, xmin, xmax, ybins, ymin, ymax), cut+Form( "deltaNLL-%f != 0",minv), "PROF");
-	t->Draw(Form("2*(deltaNLL)*136.2/59.7:%s:%s>>%s_prof(%d,%10g,%10g,%d,%10g,%10g)", y.Data(), x.Data(), name.Data(), xbins, xmin, xmax, ybins, ymin, ymax), cut + "deltaNLL !=0", "PROF");
+	t->Draw(Form("2*(deltaNLL-%f):%s:%s>>%s_prof(%d,%10g,%10g,%d,%10g,%10g)", minv,y.Data(), x.Data(), name.Data(), xbins, xmin, xmax, ybins, ymin, ymax), cut+Form( "deltaNLL-%f != 0",minv), "PROF");
+	//	t->Draw(Form("2*(deltaNLL):%s:%s>>%s_prof(%d,%10g,%10g,%d,%10g,%10g)", y.Data(), x.Data(), name.Data(), xbins, xmin, xmax, ybins, ymin, ymax), cut + "deltaNLL !=0", "PROF");
 	TH2 *prof = (TH2*) gROOT->FindObject(name+"_prof");
 	TH2D *h2d = new TH2D(name, name, xbins, xmin, xmax, ybins, ymin, ymax);
 	for (int ix = 1; ix <= xbins; ++ix) {
@@ -34,6 +34,7 @@ TH2 *treeToHist2D(TTree *t, TString x, TString y, TString name, TCut cut, double
 	}
 	h2d->GetXaxis()->SetTitle(x);
 	h2d->GetYaxis()->SetTitle(y);
+	h2d->GetZaxis()->SetTitle("-2#Deltaln L");
 	h2d->SetDirectory(0);
 	return h2d;
 }
@@ -175,7 +176,7 @@ void contour2D(TString datafile,TString xvar, int xbins, float xmin, float xmax,
 	TChain *tree = new TChain("limit","") ;
 	tree->Add(datafile);
 	//    cout<< tree->GetEntries()<<endl;
-//	int ent =tree->Draw("deltaNLL:rv:rf","abs(deltaNLL)<20");
+	//	int ent =tree->Draw("deltaNLL:rv:rf","abs(deltaNLL)<20");
 	int ent =tree->Draw("deltaNLL:"+yvar+":"+xvar,"");
 	double *dnllV = tree->GetV1();
 	double *rv = tree->GetV2();
@@ -188,31 +189,47 @@ void contour2D(TString datafile,TString xvar, int xbins, float xmin, float xmax,
 	//tree->Scan("2*deltaNLL:rv:rf","abs(2*deltaNLL-1)<0.03");
 	TH2 *hist2d = treeToHist2D(tree, xvar, yvar, "h2d", "", xmin, xmax, ymin, ymax, xbins, ybins,minv);
 	//hist2d->SetContour(200);
-//	hist2d->GetZaxis()->SetRangeUser(-0,20);
+	//	hist2d->GetZaxis()->SetRangeUser(-0,20);
 	hist2d->Draw("colz");
+	hist2d->GetXaxis()->CenterTitle();
+	hist2d->GetYaxis()->CenterTitle();
 	gPad->Print(name+"_2d.png");
 	TGraph *fit = bestFit(tree, xvar, yvar, "",minv);
 	TCanvas *c = new TCanvas ("c","",800,600);
 	TList *c68 = contourFromTH2(hist2d, 2.30);
 	TList *c95 = contourFromTH2(hist2d, 5.99);
-	TList *c997 = contourFromTH2(hist2d, 11.83);
+	//	c68->Print("v");
+	//	c95->Print("v");
+	//	TList *c997 = contourFromTH2(hist2d, 11.83);
 	styleMultiGraph(c68,  /*color=*/1, /*width=*/3, /*style=*/2);
 	styleMultiGraph(c95,  /*color=*/1, /*width=*/3, /*style=*/1);
-	styleMultiGraph(c997, /*color=*/1, /*width=*/3, /*style=*/2);
+	//	styleMultiGraph(c997, /*color=*/1, /*width=*/3, /*style=*/2);
 	hist2d->GetXaxis()->SetTitleOffset(1.0); 
-	hist2d->GetYaxis()->SetTitleOffset(0.9); 
+	hist2d->GetYaxis()->SetTitleOffset(0.2); 
+	hist2d->GetYaxis()->SetTitleOffset(0.2); 
 	//hist2d->GetXaxis()->SetTitle("#mu_{#lower[-0.2]{ggH,b#bar{b}H,t#bar{t}H,tH}}"); 
 	//hist2d->GetYaxis()->SetTitle("#mu_{#lower[-0.1]{VBF,VH}}"); 
 	hist2d->GetXaxis()->SetTitle(xtitle); 
 	hist2d->GetYaxis()->SetTitle(ytitle); 
+	c->SetRightMargin(0.2);
+	c->SetTopMargin(0.07);
+	c->SetLeftMargin(0.15);
 	hist2d->Draw("colz"); 
+	gPad->Update();
+	TPaletteAxis *palette = (TPaletteAxis*)hist2d->GetListOfFunctions()->FindObject("palette");
+	palette->SetX1NDC(palette->GetX1NDC()-0.04);
+	palette->SetX2NDC(palette->GetX2NDC()-0.04);
+//	palette->SetY1NDC();
+//	palette->SetY2NDC();
+	//	cout<< c68->size()<<endl;
+	//	cout<< c95->size()<<endl;
 	if(c68->At(1)){
 		c68->At(1)->Draw("C SAME");
-	//	c95->At(1)->Draw("C SAME");
+		c95->At(1)->Draw("C SAME");
 	}
 	else{
-		c68->At(0)->Draw("C SAME");
-		c95->At(0)->Draw("C SAME");
+//			c68->At(0)->Draw("C SAME");
+		c95->At(0)->Draw("C same");
 	}
 	//c68->Draw("C SAME");
 	//c95->Draw("C SAME");
@@ -245,9 +262,12 @@ void contour2D(TString datafile,TString xvar, int xbins, float xmin, float xmax,
 	ptc->SetTextFont(42);
 	ptc->SetTextSize(0.04);
 	ptc->AddText("H#rightarrowZZ#rightarrow4l");
-	ptc->AddText("m_{H} profiled");
+//	ptc->AddText("m_{H} profiled");
 	ptc->Draw();
 	gPad->SetGrid(1,1);
+	//applycanvasstyle((TCanvas*)gPad);
+	applylegendstyle(leg);
+	applyaxesstyle(hist2d);
 	gPad->Print(name+".png");
 	gPad->Print(name+".pdf");
 	if (fOut != 0) {
@@ -255,7 +275,7 @@ void contour2D(TString datafile,TString xvar, int xbins, float xmin, float xmax,
 		fit->SetName(name+"_best");    fOut->WriteTObject(fit,0);
 		c68->SetName(name+"_c68");     fOut->WriteTObject(c68,0,"SingleKey");
 		c95->SetName(name+"_c95");     fOut->WriteTObject(c95,0,"SingleKey");
-		c997->SetName(name+"_c997");   fOut->WriteTObject(c997,0,"SingleKey");
+		//c997->SetName(name+"_c997");   fOut->WriteTObject(c997,0,"SingleKey");
 	}
 }
 

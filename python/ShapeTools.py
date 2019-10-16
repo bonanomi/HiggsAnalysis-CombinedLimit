@@ -664,7 +664,7 @@ class ShapeBuilder(ModelBuilder):
         else:
 	    xvar =  nominalPdf.getObservables(self.out.data_obs) #.first()
 	    print xvar
-            _cache[(channel,process)] = ROOT.VerticalInterpPdf("shape%s_%s_%s_morph" % (postFix,channel,process), "", xvar,pdfs, coeffs, qrange, qalgo)
+            _cache[(channel,process)] = ROOT.VerticalInterpPdf("shape%s_%s_%s_morph" % (postFix,channel,process), "", pdfs, coeffs, qrange, qalgo)
         return _cache[(channel,process)]
     def isShapeSystematic(self,channel,process,syst):
     	systShapeName = syst

@@ -8,6 +8,7 @@ class stagex(PhysicsModel):
 	self.actth=False 
 	self.acggh=False 
 	self.accor=False 
+	self.useint=False 
 	self.eft=False 
 	self.options= ""
 	self.stage0= False 
@@ -33,6 +34,17 @@ class stagex(PhysicsModel):
 				  		muname= "c_ts"
 					else:
 				  		muname= "r_ggH_times_x"
+				    elif "Mix" in process:
+				  	if self.eft:
+						if self.useint:
+					  		muname= "c_int"
+						else:
+							return 0
+					else:
+						if self.useint:
+				  			muname= "r_ggH_times_int"
+						else:
+							return 0
 				    else:
 				  	if self.eft:
 				  		muname= "c_s"
@@ -107,11 +119,21 @@ class stagex(PhysicsModel):
 				self.modelBuilder.factory_("expr::kappa_ts(\"@0*@0/2.56\", kappa_t)");
 				self.modelBuilder.factory_("expr::kappa_s(\"@0*@0\", kappa)");
 				if not self.accor:
-					self.modelBuilder.factory_("expr::c_ts(\"@0*@0\", cgg_t)");
-					self.modelBuilder.factory_("expr::c_s(\"@0*@0\", cgg)");
+					if self.useint:
+						self.modelBuilder.factory_("expr::c_ts(\"@0*@0+@0*@1\", cgg_t,cgg)");
+						self.modelBuilder.factory_("expr::c_s(\"@0*@0+@0*@1\", cgg,cgg_t)");
+					else:
+						self.modelBuilder.factory_("expr::c_ts(\"@0*@0\", cgg_t)");
+						self.modelBuilder.factory_("expr::c_s(\"@0*@0\", cgg)");
+					self.modelBuilder.factory_("expr::c_int(\"-2*@0*@1\", cgg, cgg_t)");
 				else:
-					self.modelBuilder.factory_("expr::c_ts(\"@0*@0*2.25\", kappa_t)");
-					self.modelBuilder.factory_("expr::c_s(\"@0*@0\", kappa)");
+					if self.useint:
+						self.modelBuilder.factory_("expr::c_ts(\"@0*@0*2.25+1.5*@0*@1\", kappa_t,kappa)");
+						self.modelBuilder.factory_("expr::c_s(\"@0*@0+1.5*@0*@1\", kappa,kappa_t)");
+					else:
+						self.modelBuilder.factory_("expr::c_ts(\"@0*@0*2.25\", kappa_t)");
+						self.modelBuilder.factory_("expr::c_s(\"@0*@0\", kappa)");
+					self.modelBuilder.factory_("expr::c_int(\"-1.5*2*@0*@1\", kappa, kappa_t)");
 				if self.actth:
 					self.pois.append("kappa,kappa_t")
 				else:
@@ -120,16 +142,26 @@ class stagex(PhysicsModel):
 			else:
 				self.modelBuilder.doVar("r_TTH[1,0,10]" )
 				self.modelBuilder.doVar("r_ggH[1,0,10]" )
-				self.modelBuilder.doVar("x[0,0,1]" )
-				self.modelBuilder.factory_("expr::r_TTH_times_x(\"@0*@1/2.56\", r_TTH, x)");
-				self.modelBuilder.factory_("expr::r_TTH_times_notx(\"@0*(1-@1)\", r_TTH, x)");
+				self.modelBuilder.doVar("x[0,-1,1]" )
+				self.modelBuilder.factory_("expr::r_TTH_times_x(\"@0*abs(@1)/2.56\", r_TTH, x)");
+				self.modelBuilder.factory_("expr::r_TTH_times_notx(\"@0*(1-abs(@1))\", r_TTH, x)");
 				if self.accor:
-					self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*@1\", r_TTH, x)");
-					self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-@1)\", r_TTH, x)");
+					if self.useint:
+						self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*abs(@1)-(@1>0?-1.5:1.5)*@0*sqrt(1-abs(@1))*sqrt(abs(@1))\", r_TTH, x)");
+						self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-abs(@1))-(@1>0?-1.5:1.5)*@0*sqrt(1-abs(@1))*sqrt(abs(@1))\", r_TTH, x)");
+					else:
+						self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*abs(@1)\", r_TTH, x)");
+						self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-abs(@1)))\", r_TTH, x)");
+					self.modelBuilder.factory_("expr::r_ggH_times_int(\"(@1>0?-1.5:1.5)*2*@0*sqrt(1-abs(@1))*sqrt(abs(@1))\", r_TTH, x)");
 					self.pois.append("x,r_TTH")
 				else:
-					self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*@1\", r_ggH, x)");
-					self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-@1)\", r_ggH, x)");
+					if self.useint:
+						self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*abs(@1)-(@1>0?-1.5:1.5)*@0*sqrt(1-abs(@1))*sqrt(abs(@1))\", r_ggH, x)");
+						self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-abs(@1))-(@1>0?-1.5:1.5)*@0*sqrt(1-abs(@1))*sqrt(abs(@1))\", r_ggH, x)");
+					else:
+						self.modelBuilder.factory_("expr::r_ggH_times_x(\"2.25*@0*abs(@1)\", r_ggH, x)");
+						self.modelBuilder.factory_("expr::r_ggH_times_notx(\"@0*(1-abs(@1))\", r_ggH, x)");
+					self.modelBuilder.factory_("expr::r_ggH_times_int(\"(@1>0?-1.5:1.5)*2*@0*sqrt(1-abs(@1))*sqrt(abs(@1))\", r_ggH, x)");
 					self.pois.append("x,r_ggH,r_TTH")
 		if self.modelBuilder.out.var(muname):
 			print "reclying %s" %muname
@@ -156,6 +188,9 @@ class stagex(PhysicsModel):
 		    if 'doacggh' in po: 
 			    self.acggh= True
 	                    print "doing tth AC ggH"
+		    if 'useint' in po: 
+			    self.useint= True
+	                    print "use interference"
 		    if 'doeft' in po: 
 			    self.eft= True
 	                    print "doing EFT framework"

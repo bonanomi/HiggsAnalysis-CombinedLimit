@@ -6,7 +6,6 @@
 
 #include "RooAbsPdf.h"
 #include "RooListProxy.h"
-#include "RooSetProxy.h"
 #include "RooAICRegistry.h"
 #include "RooObjCacheManager.h"
 
@@ -14,7 +13,7 @@ class VerticalInterpPdf : public RooAbsPdf {
 public:
 
   VerticalInterpPdf() ;
-  VerticalInterpPdf(const char *name, const char *title, const RooArgSet &x,const RooArgList& funcList, const RooArgList& coefList, Double_t quadraticRegion=0., Int_t quadraticAlgo=0) ;
+  VerticalInterpPdf(const char *name, const char *title, const RooArgList& funcList, const RooArgList& coefList, Double_t quadraticRegion=0., Int_t quadraticAlgo=0) ;
   VerticalInterpPdf(const VerticalInterpPdf& other, const char* name=0) ;
   virtual TObject* clone(const char* newname) const { return new VerticalInterpPdf(*this,newname) ; }
   virtual ~VerticalInterpPdf() ;
@@ -29,7 +28,6 @@ public:
   const RooArgList& funcList() const { return _funcList ; }
   const RooArgList& coefList() const { return _coefList ; }
 
-  const RooSetProxy &x() const { return _x; }
 protected:
   
   class CacheElem : public RooAbsCacheElement {
@@ -40,7 +38,6 @@ protected:
     RooArgList _funcIntList ;
     RooArgList _funcNormList ;
   } ;
-  RooSetProxy   _x;
   mutable RooObjCacheManager _normIntMgr ; // The integration cache manager
 
   RooListProxy _funcList ;   //  List of component FUNCs
@@ -51,7 +48,6 @@ protected:
   TIterator* _coefIter ;    //! Iterator over coefficient list
 
   Double_t interpolate(Double_t coeff, Double_t central, RooAbsReal *fUp, RooAbsReal *fDown) const ; 
-  float overall;
 
 private:
 
