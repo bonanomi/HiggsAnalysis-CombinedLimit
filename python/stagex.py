@@ -8,6 +8,7 @@ class stagex(PhysicsModel):
 	self.options= ""
 	self.stage0= False
 	self.SingleVH= False 
+	self.stxs0= False
 	self.rvrf= False 
 	self.singlemu= False 
 	self.splitHad= False 
@@ -60,6 +61,31 @@ class stagex(PhysicsModel):
 			  	        muname= "r_VH_Had"
 				if "Lep" in process:
 				 	muname= "r_VH_Lep"
+
+		elif self.stxs0 :
+			if process.startswith("ggH"):
+				muname= "r_ggH"
+		  	elif "WHori" in process :
+				muname= "r_qqH"
+			elif "ZHori" in process :
+				muname= "r_qqH"
+		  	elif "VBFori" in process :
+				muname= "r_qqH"
+		  	elif process.startswith("VBF") :
+				muname= "r_qqH"
+			elif "Had" in process: 
+				muname= "r_qqH"
+			elif "Lep" in process: 
+				muname= "r_VH_Lep"
+			elif process.startswith("TTH"):
+			  	muname= "r_TTH"
+			elif process.startswith("TH"):
+			  	muname= "r_TTH"
+			elif process.startswith("BBH"):
+			  	muname= "r_ggH"
+			elif process.startswith("VH"):
+			  	muname= "r_qqH"
+
 		elif self.singlemu:
 			muname = "r"
 		elif self.rvrf:
@@ -95,6 +121,9 @@ class stagex(PhysicsModel):
 		    if 'doStage0' in po: 
 			    self.stage0= True
 	                    print "doing stage0"
+		    if 'stxs0' in po: 
+			    self.stxs0= True
+	                    print "doing STXS stage0"	                    
 		    if 'SingleVH' in po:
 			    self.SingleVH= True
 			    print "merging WH, ZH in VH"
